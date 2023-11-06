@@ -2,7 +2,7 @@
 
 ## Install and setup
 
-This project requires node.js you will need to figure that part out on your own.
+This project requires node.js you will need to figure that part out on your own. Here is a link to help [https://nodejs.org/en/download](https://nodejs.org/en/download)
 
 Navigate to the project in a terminal and install the modules  
 `npm install`  
