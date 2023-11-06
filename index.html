@@ -1,0 +1,95 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV App</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        function uploadFile() {
+            var formData = new FormData(document.getElementById('uploadForm'));
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.headers) {
+                    const list = document.getElementById('headersList');
+                    list.innerHTML = ''; // Clear the list
+
+                    data.headers.forEach((header, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = header;
+                        listItem.style.cursor = 'pointer';
+                        listItem.onclick = function() {
+                            selectColumn(data.filename, index);
+                        };
+                        list.appendChild(listItem);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+            return false; // Prevent the default form submission
+        }
+
+        function selectColumn(filename, columnIndex) {
+            // Hide the headers list
+            document.getElementById('headersList').style.display = 'none';
+            document.getElementById('upload').style.display = 'none';
+            document.getElementById('select_patient_heading').style.display = 'none';
+
+            fetch(`/process-csv?filename=${encodeURIComponent(filename)}&column=${columnIndex}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                // Create a link element, use it to download the file and remove it from the body
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                // the filename you want
+                a.download = `processed_${filename}.csv`; // Make sure this includes the .csv extension
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('Your file has been processed and downloaded!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // WebSocket functionality
+        const socket = io();
+
+        // Listen for progress updates
+        socket.on('progress', function (data) {
+            const progress = `${data.current} / ${data.total}`;
+            document.getElementById('progress').textContent = progress;
+        });
+    </script>
+</head>
+
+<body>
+    <div id="upload" >
+    <h1>Upload CSV File</h1>
+    <form id="uploadForm" onsubmit="return uploadFile()">
+        <input type="file" name="file" accept=".csv" required>
+        <input type="submit" value="Upload">
+    </form>
+</div>
+    <p id="progress"></p>
+
+    <h2 id="select_patient_heading">Select Patient License ID Column</h2>
+    <ul id="headersList"></ul>
+</body>
+</html>
