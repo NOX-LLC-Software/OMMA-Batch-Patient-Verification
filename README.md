@@ -1,5 +1,7 @@
 # OMMA-Batch-Patient-Verification
 
+This is a very basic single-page application that helps Oklahoma dispensaries audit their patient records. The app accepts a .csv file where one of the columns is the OMMA Patient License number. The app looks up each patient on the OMMA verification website and appends the result of that search to new columns at the end of the respective row. Be aware that the OMMA verification will not give a positive result if the license is expired and not renewed. If you give it a list of old patient licenses that were valid at the time of a transaction they could still look invalid because they no longer appear in the OMMA verification. If a license is expired but was renewed, the app automatically checks for the new license based on the naming convention we have identified.  
+
 ## Install and setup
 
 This project requires node.js you will need to figure that part out on your own. Here is a link to help [https://nodejs.org/en/download](https://nodejs.org/en/download)
